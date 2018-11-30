@@ -130,6 +130,7 @@ protocol ArchivePlaceDefinition {
 		union { null, string } toPoiId = null;
 		union { null, com.tomtom.places.unicorn.domain.avro.source.AVUUID } toDeliveryPlaceId = null;
 		union { null, string } code = null;
+		union { null, array<string> } entryPointFunctions = null;
 		// fields that are not part of the archive REL file but necessary for CPP
 		union { null, string } toExternalIdentifier = null;
 		union { null, string } toCppId = null;
