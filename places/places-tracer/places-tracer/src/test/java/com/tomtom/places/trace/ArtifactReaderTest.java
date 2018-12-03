@@ -33,6 +33,7 @@ public class ArtifactReaderTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testReaderNea() throws Exception {
 		RunDescriptorSupport rds = RunDescriptorSupport.loadFromFile(HdfsTools.forDefaultFileSystem().getConfiguration(), SINGLE_LOCALITY_RUN_DESCRIPTOR_PATH);
 		ArtifactReader reader = new ArtifactReader(SINGLE_LOCALITY_RUN_DESCRIPTOR_PATH, rds, HdfsTools.forDefaultFileSystem());
@@ -44,6 +45,23 @@ public class ArtifactReaderTest {
 		for(ClusteredPlace place:materialize) {
 			System.out.println(place);
 		}
+		
+	}
+	
+	@Test
+	public void testConfig() throws Exception {
+		RunDescriptorSupport rds = RunDescriptorSupport.loadFromFile(HdfsTools.forDefaultFileSystem().getConfiguration(), SINGLE_LOCALITY_RUN_DESCRIPTOR_PATH);
+		
+		String gp3Config = rds.getConfigurationArchiveDistributedCacheHdfsPath();
+		System.out.println(gp3Config);
+		System.out.println(rds.getConfigurationApiLocalPath());
+		System.out.println(rds.getConfigurationArchiveDistributedCacheSymlink());
+		
+		String abc="/dahgda/asdgjahdg.asdfhgasd/OBS/sgdgs2";
+		
+		System.out.println(abc.contains("/OBS"));
+		
+		System.out.println(rds.getIntakeDeliveryListPath());
 		
 	}
 
