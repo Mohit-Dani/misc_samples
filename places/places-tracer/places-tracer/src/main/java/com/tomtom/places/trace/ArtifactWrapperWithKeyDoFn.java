@@ -13,76 +13,53 @@ import com.tomtom.places.unicorn.domain.avro.composite.CompositePlace;
 import com.tomtom.places.unicorn.domain.avro.normalized.NormalizedPlace;
 import com.tomtom.places.unicorn.domain.avro.source.AVUUID;
 import com.tomtom.places.unicorn.domain.avro.trace.Trace;
-import com.tomtom.places.unicorn.domain.avro.trace.TraceType;
 import com.tomtom.places.unicorn.domain.avro.tracer.PlaceTrace;
 
 public class ArtifactWrapperWithKeyDoFn<S extends SpecificRecordBase> extends DoFn<S, Pair<String, PlaceTrace>> {
 
-	private static final long serialVersionUID = -8982729040269874798L;
-	private boolean enableSameSupplierMultipleRecords;//Single cluster can have multiple records from same supplier.  
+    @Override
+    public void process(S input, Emitter<Pair<String, PlaceTrace>> emitter) {
+        PlaceTrace placeTrace = PlaceTrace.newBuilder().build();
 
-	public ArtifactWrapperWithKeyDoFn(boolean enableSameSupplierMultipleRecords) {
-		this.enableSameSupplierMultipleRecords=enableSameSupplierMultipleRecords;
-	}
-
-	@Override
-	public void process(S input, Emitter<Pair<String, PlaceTrace>> emitter) {
-		PlaceTrace placeTrace = PlaceTrace.newBuilder().build();
-
-		if (input instanceof NormalizedPlace) {
-			NormalizedPlace place = (NormalizedPlace)input;
-			placeTrace.setMappedPlace(NormalizedPlace.newBuilder(place).build());
-			emitter.emit(Pair.of(place.getDeliveryPlaceId().toString(), placeTrace));
-		} else if (input instanceof ClusteredPlace) {
-			ClusteredPlace place = ClusteredPlace.newBuilder((ClusteredPlace)input).build();
-			placeTrace.setClusteredPlace(ClusteredPlace.newBuilder(place).build());
-
-			handleMultipleRecordsFromSameSupplier(placeTrace, place, emitter);
-
-
-		} else if (input instanceof Trace) {
-			Trace trace = Trace.newBuilder((Trace)input).build();
-
-			if(trace.getTraceType()==TraceType.LocalityRule_SourcePlace ||trace.getTraceType()==TraceType.ClusterOriginIds) {
-				placeTrace.setTraces(Lists.newArrayList(Trace.newBuilder(trace).build()));
-				if (StringUtils.isNotBlank(trace.getObjectId()) && trace.getObjectId().toString().contains("mostSigBits")) {
-					emitter.emit(Pair.of(trace.getObjectId().toString(), placeTrace));
-				}
-				if (trace.getOriginObjectIds() != null) {
-					for (CharSequence id : trace.getOriginObjectIds()) {
-						if (StringUtils.isNotBlank(id)) {
-							emitter.emit(Pair.of(id.toString(), placeTrace));
-						}
-					}
-				}
-
-			}
-		} else if (input instanceof ArchivePlace) {
-			ArchivePlace place = (ArchivePlace)input;
-			placeTrace.setArchivePlace(ArchivePlace.newBuilder(place).build());
-			for (AVUUID id : place.getDeliveryPlaceIds()) {
-				emitter.emit(Pair.of(id.toString(), placeTrace));
-			}
-		} /*else if (input instanceof PlaceTrace) {
+        if (input instanceof NormalizedPlace) {
+            NormalizedPlace place = (NormalizedPlace)input;
+            placeTrace.setMappedPlace(NormalizedPlace.newBuilder(place).build());
+            emitter.emit(Pair.of(place.getDeliveryPlaceId().toString(), placeTrace));
+        } else if (input instanceof ClusteredPlace) {
+            ClusteredPlace place = ClusteredPlace.newBuilder((ClusteredPlace)input).build();
+            placeTrace.setClusteredPlace(ClusteredPlace.newBuilder(place).build());
+            for (CompositePlace cp : place.getMatchingPlaces()) {
+                emitter.emit(Pair.of(cp.getMappedPlace().getDeliveryPlaceId().toString(), placeTrace));
+            }
+            if (place.getRejectedPlaces() != null) {
+                for (CompositePlace cp : place.getRejectedPlaces()) {
+                    emitter.emit(Pair.of(cp.getMappedPlace().getDeliveryPlaceId().toString(), placeTrace));
+                }
+            }
+        } else if (input instanceof Trace) {
+            Trace trace = Trace.newBuilder((Trace)input).build();
+            placeTrace.setTraces(Lists.newArrayList(Trace.newBuilder(trace).build()));
+            if (StringUtils.isNotBlank(trace.getObjectId()) && trace.getObjectId().toString().contains("mostSigBits")) {
+                emitter.emit(Pair.of(trace.getObjectId().toString(), placeTrace));
+            }
+            if (trace.getOriginObjectIds() != null) {
+                for (CharSequence id : trace.getOriginObjectIds()) {
+                    if (StringUtils.isNotBlank(id)) {
+                        emitter.emit(Pair.of(id.toString(), placeTrace));
+                    }
+                }
+            }
+        } else if (input instanceof ArchivePlace) {
+            ArchivePlace place = (ArchivePlace)input;
+            placeTrace.setArchivePlace(ArchivePlace.newBuilder(place).build());
+            for (AVUUID id : place.getDeliveryPlaceIds()) {
+                emitter.emit(Pair.of(id.toString(), placeTrace));
+            }
+        } /*else if (input instanceof PlaceTrace) {
             PlaceTrace place = (PlaceTrace)input;
             if (placeTrace.getClusteredPlace() != null) {
                 emitter.emit(Pair.of(placeTrace.getClusteredPlace().getClusteredPlaceId().toString(), (SpecificRecordBase)placeTrace));
             }
         }*/
-	}
-
-	private void handleMultipleRecordsFromSameSupplier(PlaceTrace placeTrace, ClusteredPlace place,
-			Emitter<Pair<String, PlaceTrace>> emitter) {
-
-		if(enableSameSupplierMultipleRecords) {
-			for (CompositePlace cp : place.getMatchingPlaces()) {
-				emitter.emit(Pair.of(cp.getMappedPlace().getDeliveryPlaceId().toString(), placeTrace));
-			}
-			if (place.getRejectedPlaces() != null) {
-				for (CompositePlace cp : place.getRejectedPlaces()) {
-					emitter.emit(Pair.of(cp.getMappedPlace().getDeliveryPlaceId().toString(), placeTrace));
-				}
-			}
-		}
-	}
+    }
 }

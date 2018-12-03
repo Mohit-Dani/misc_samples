@@ -50,6 +50,6 @@ public class ArtifactWrapperWithKey {
 
     private <T extends SpecificRecordBase> PCollection<Pair<String, PlaceTrace>>
         withKey(String locality, ArtifactId artifactId, PCollection<T> artifact, Pipeline pipeline) throws Exception {
-        return artifact.parallelDo(artifactId.toString(), new ArtifactWrapperWithKeyDoFn(true), Avros.pairs(Avros.strings(), Avros.records(PlaceTrace.class)));
+        return artifact.parallelDo(artifactId.toString(), new ArtifactWrapperWithKeyDoFn(), Avros.pairs(Avros.strings(), Avros.records(PlaceTrace.class)));
     }
 }

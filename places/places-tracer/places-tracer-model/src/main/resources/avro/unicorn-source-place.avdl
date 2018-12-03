@@ -17,22 +17,11 @@ protocol SourcePlaceDefinition {
 		NotStable
 	}
 
-	enum EvLevel {
-		POI,
-		Station,
-		Spot
-	}
-
 	record ExternalId {
 		ExternalIdType type;
 		string value;
 	}
 	
-	record SourceId {
-		string value;
-		union { null, EvLevel } evLevel = null;
-	}
-
 	record Supplier {
 		string id = "";
 		string name;
@@ -85,12 +74,6 @@ protocol SourcePlaceDefinition {
 	enum EntryPointType {
 		Main,
 		Secondary
-	}
-	
-	enum EntryPointFunction {
-		Main,
-		Routing,
-		Emergency
 	}
 
 	enum LocationContentType {
@@ -186,7 +169,6 @@ protocol SourcePlaceDefinition {
 	record EntryPoint {
 		union { null, Text } name = null;
 		union { null, EntryPointType } type = null;
-		union { null, array<EntryPointFunction> } functionTypes = null;
 		union { null, MapReference } mapReference = null;
 		union { null, Accuracy } accuracy = null;
 		union { null, Point } point = null;
@@ -228,14 +210,6 @@ protocol SourcePlaceDefinition {
 		union { null, Text } text = null;
 	}
 	
-	record PaymentDetailCode {
-		union { null, string } value = null;
-	}
-	
-	record PaymentMethodCode {
-		union { null, string } value = null;
-	}
-	
 	enum PaymentMethod {
 		Cash,
 		ExactChange,
@@ -257,10 +231,7 @@ protocol SourcePlaceDefinition {
 		WireTransfer,
 		Variable,
 		ServiceProviderPaymentMethod,
-		NoPayment,
-		BankOrDebitCard,
-		CoinsOnlyOrExactChange,
-		ElectronicTollCollection
+		NoPayment
 	}
 	
 /* Classification components */ 
@@ -378,14 +349,13 @@ protocol SourcePlaceDefinition {
 
 	record EvsSpot {
 		union { null, string } evsSpotIdentifier = null;
-		union { null, string } evseIdentifier = null;
 		union { null, string } evsIdentifier = null;
 		union { null, string } evsCompanyName = null;
 		union { null, int } evsNumberOfSpots = null;
 		union { null, EvsAccess } evsAccess = null;
 		union { null, array<string> } evsStorey = null;
 		union { null, array<EvsCharging> } evsCharging = null;
-		union { null, array<EvsReceptacle> } evsReceptacle = null;
+		union { null, EvsReceptacle } evsReceptacle = null;
 		union { null, array<EvsReservability> } evsReservability = null;
 		union { null, array<PaymentMethod> } paymentMethods = null;	
 	}
@@ -432,15 +402,9 @@ protocol SourcePlaceDefinition {
 		ReverseGeocode,
 		ForwardGeocode,
 		ShowStopper,
-		MainAirport,
-		CaptureSourceId
+		MainAirport
 	}
 
-	enum HydrogenPressure {
-		H35,
-		H70
-	}
-	
 	enum PetrolFlag {
 		LPG,
 		Petrol,
@@ -459,16 +423,8 @@ protocol SourcePlaceDefinition {
 		DieselCommercial,
 		E85,
 		Hydrogen,
-		Propane,
-		LNG
+		Propane
 	}
-	
-	enum VehicleType {
-		PassengerCar,
-		MediumTruck,
-		HeavyTruck
-	}
-	
 	/* Observations*/
 	
 	enum ObservationType {
@@ -493,20 +449,12 @@ protocol SourcePlaceDefinition {
 		union { null, string } observationId = null;
 		union { null, MetaData } metaData = null;
 	}
-	
-	
-	record PaymentMethodInfo {
-		union { null, PaymentMethodCode } paymentMethodCode = null;
-		union { null, array<PaymentDetailCode> } paymentDetailCodes = null;
-	}
-	
+
 	record SourcePlace {
 	
 		AVUUID deliveryPlaceId;
 		
 		union { null, array<ExternalId> } externalIds = null;
-		
-		union { null, array<SourceId> } sourceId = null;
 		
 		union { null, int } lineNumber = null;
 		
@@ -533,8 +481,6 @@ protocol SourcePlaceDefinition {
 		union { null, array<Description> } descriptions = null;
 		
 		union { null, array<PaymentMethod> } paymentMethods = null;	
-		
-		union { null, array<PaymentMethodInfo> } paymentMethodInfos = null;
 
 		union { null, array<Relation> } relations = null;
 		
@@ -566,10 +512,6 @@ protocol SourcePlaceDefinition {
 		
 		// To be removed again when taxonomy changes have been completed
 		union { null, array<PetrolFlag> } petrolFlags  = null;
-		
-		union { null, array<HydrogenPressure> } hydrogenPressures  = null;
-		
-		union { null, array<VehicleType> } vehicleTypes  = null;
 				
 	}	
 }

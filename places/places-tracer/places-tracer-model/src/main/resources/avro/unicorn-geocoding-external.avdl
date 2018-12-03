@@ -26,7 +26,6 @@ protocol GeocodingExternalDefinition {
 	record ExtEntryPoint {
 		union { null, com.tomtom.places.unicorn.domain.avro.source.AVUUID } locusToEpKey;
 		union { null, com.tomtom.places.unicorn.domain.avro.source.EntryPointType } type = null;
-		union { null, array<com.tomtom.places.unicorn.domain.avro.source.EntryPointFunction> } functionTypes = null;
 	    union { null, com.tomtom.places.unicorn.domain.avro.source.MapReference } mapReference = null;
 	    union { null, com.tomtom.places.unicorn.domain.avro.normalized.NAccuracy } accuracy = null;
 		union { null, com.tomtom.places.unicorn.domain.avro.normalized.NPoint } point = null;
